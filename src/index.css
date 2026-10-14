@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+:root {
+  --bg-principal: #FFFFFF;
+  --text-principal: #111827;
+  --text-negro: #000000;
+
+  /* Paleta de azules institucionales solicitada */
+  --azul-muy-claro-1: #E3F2FD;
+  --azul-muy-claro-2: #BBDEFB;
+  --azul-claro-1: #90CAF9;
+  --azul-claro-2: #64B5F6;
+  --azul-medio-1: #42A5F5;
+  --azul-medio-2: #2196F3;
+  --azul-fuerte-1: #1E88E5;
+  --azul-fuerte-2: #1976D2;
+  --azul-oscuro-1: #1565C0;
+  --azul-oscuro-2: #0D47A1;
+}
+
+/* Escala tipográfica: solo 4 tamaños en toda la página
+   (el título de la portada es la única excepción y define el suyo) */
+@theme {
+  --font-sans: 'Libre Baskerville', Georgia, serif;
+
+  /* Pequeño · 13 px: etiquetas, notas y datos secundarios */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.45;
+
+  /* Normal · 15 px: texto de lectura */
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.6;
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.6;
+
+  /* Subtítulo · 18 px: títulos de tarjeta y menú */
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.4;
+  --text-xl: 1.125rem;
+  --text-xl--line-height: 1.4;
+
+  /* Título · 28 px: títulos de sección y cifras destacadas */
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 1.25;
+  --text-3xl: 1.75rem;
+  --text-3xl--line-height: 1.25;
+  --text-4xl: 1.75rem;
+  --text-4xl--line-height: 1.25;
+  --text-5xl: 1.75rem;
+  --text-5xl--line-height: 1.25;
+}
+
+@layer base {
+  /* Una sola tipografía (la del menú) y tres colores de letra: negro, blanco y azul #1565C0 */
+  body {
+    background-color: #FFFFFF;
+    color: #111827;
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 0.9375rem;
+    overflow-x: hidden;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+  }
+
+  .font-mono-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Ajustes limpios para contenedor Leaflet */
+.leaflet-container {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  z-index: 10 !important;
+  background-color: #E3F2FD;
+}
+
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 20 !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 10px;
+  border: 1px solid #BBDEFB;
+  box-shadow: 0 10px 25px -5px rgba(13, 71, 161, 0.15);
+}
