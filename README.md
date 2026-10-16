@@ -40,9 +40,11 @@ src/
 
 ## Publicar en AWS
 
-1. **Página** (S3 + CloudFront o Amplify): `npm run build` genera la carpeta `dist/`, que se sube tal cual.
+1. **Página** (S3 + CloudFront o Amplify):
+   - S3 + CloudFront: `npm run build` genera la carpeta `dist/`, que se sube tal cual a un bucket S3; CloudFront sirve ese bucket por HTTPS. Opcional: Route 53 + ACM para dominio propio.
+   - Amplify Hosting (más simple): conectar el repo de GitHub; Amplify corre `npm run build` y publica `dist/` en cada push, con HTTPS y CDN incluidos.
 2. **Noticias** (Lambda + API Gateway): `api/noticias.ts` exporta `handler`.
-   Crear una Lambda con Node.js 20+ y dos rutas GET en API Gateway: `/noticias` y `/nota`.
+   Crear una Lambda con Node.js 20+ (rol de ejecución básico, solo necesita `AWSLambdaBasicExecutionRole` para logs en CloudWatch) y dos rutas GET en API Gateway: `/noticias` y `/nota`, ambas apuntando a esa Lambda.
 3. **Conectar ambas**: antes de `npm run build`, crear un archivo `.env` con la URL de API Gateway:
 
    ```
@@ -50,3 +52,12 @@ src/
    ```
 
 Sin `.env`, la página usa `/api`, que solo existe con `npm run dev`.
+
+```
+Usuario → CloudFront/Amplify (dist/) → React en el navegador
+                                          │
+                                          ├─ Open-Meteo API (directo, sin AWS)
+                                          └─ VITE_API_URL → API Gateway → Lambda (noticias.ts) → gob.pe
+```
+
+No se necesita RDS, DynamoDB, SNS, SES ni Cognito: el sitio no guarda datos de usuarios ni envía notificaciones, solo consulta Open-Meteo (directo desde el navegador) y gob.pe (vía la Lambda).
