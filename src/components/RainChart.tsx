@@ -53,7 +53,7 @@ export const RainChart: React.FC<RainChartProps> = ({
   const risk = RISK_UI[station.riskLevel];
 
   return (
-    <div className="bg-white rounded-2xl border border-[#BBDEFB] shadow-xs overflow-hidden">
+    <div className="bg-[#E2E8F0] rounded-2xl border border-[#BBDEFB] shadow-xs overflow-hidden">
       {/* Selector y datos clave */}
       <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 p-5 sm:p-6 border-b border-[#E3F2FD]">
         <label className="flex items-center gap-2 shrink-0">
@@ -100,7 +100,7 @@ export const RainChart: React.FC<RainChartProps> = ({
         <button
           type="button"
           onClick={() => onViewStationOnMap(station)}
-          className="self-start lg:self-auto px-4 py-2 rounded-lg border border-[#90CAF9] hover:bg-[#E3F2FD] text-[#1565C0] text-sm font-semibold cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap"
+          className="self-start lg:self-auto px-4 py-2 rounded-lg border border-[#90CAF9] bg-white hover:bg-[#E3F2FD] text-[#1565C0] text-sm font-semibold cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap"
         >
           <MapPin className="w-4 h-4" />
           Ver en el mapa
@@ -197,7 +197,7 @@ export const RainChart: React.FC<RainChartProps> = ({
 
       {/* Vista general: los 5 departamentos con más lluvia hoy */}
       {isLive && (
-        <div className="px-5 sm:px-6 py-4 border-t border-[#E3F2FD] bg-[#F8FBFF]">
+        <div className="px-5 sm:px-6 py-4 border-t border-[#E3F2FD] bg-[#F1F5F9]">
           <span className="block text-sm font-bold text-[#111827] mb-2">Más lluvia hoy</span>
           <div className="flex flex-wrap gap-2">
             {ranking.slice(0, 5).map((s) => (

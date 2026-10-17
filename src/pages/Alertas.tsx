@@ -19,10 +19,10 @@ const STATUS_COUNTERS: { level: RiskLevel; label: string; short: string }[] = [
   { level: 'BAJO', label: 'Normal', short: 'Normal' },
 ];
 
-const LEVEL_STYLES: Record<RiskLevel, { color: string; label: string; chip: string; border: string }> = {
-  ALTO: { color: RISK_COLOR.ALTO, label: 'Peligro', chip: 'bg-white text-[#111827] border-[#BBDEFB]', border: 'border-l-[#1565C0]' },
-  MEDIO: { color: RISK_COLOR.MEDIO, label: 'Precaución', chip: 'bg-white text-[#111827] border-[#BBDEFB]', border: 'border-l-[#1565C0]' },
-  BAJO: { color: RISK_COLOR.BAJO, label: 'Normal', chip: 'bg-white text-[#111827] border-[#BBDEFB]', border: 'border-l-[#1565C0]' },
+const LEVEL_STYLES: Record<RiskLevel, { color: string; label: string; chip: string }> = {
+  ALTO: { color: RISK_COLOR.ALTO, label: 'Peligro', chip: 'bg-white text-[#111827] border-[#BBDEFB]' },
+  MEDIO: { color: RISK_COLOR.MEDIO, label: 'Precaución', chip: 'bg-white text-[#111827] border-[#BBDEFB]' },
+  BAJO: { color: RISK_COLOR.BAJO, label: 'Normal', chip: 'bg-white text-[#111827] border-[#BBDEFB]' },
 };
 
 
@@ -179,7 +179,6 @@ export const AlertasPage: React.FC<AlertasPageProps> = ({
     document.body.removeChild(link);
   };
 
-  const wettest = [...stations].sort((a, b) => b.precipitationMm - a.precipitationMm)[0];
   const levelCounts: Record<RiskLevel, number> = {
     ALTO: stations.filter((st) => st.riskLevel === 'ALTO').length,
     MEDIO: stations.filter((st) => st.riskLevel === 'MEDIO').length,
@@ -190,10 +189,23 @@ export const AlertasPage: React.FC<AlertasPageProps> = ({
     <div className="w-full bg-white">
       {/* Encabezado de la página */}
       <section className="max-w-[1320px] mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-8">
-        <h1 className="text-2xl font-bold text-[#111827]">Centro de Alertas</h1>
-        <p className="text-sm text-[#111827] mt-1">{isLive
-            ? `${activeAlerts.length} ${activeAlerts.length === 1 ? 'alerta activa' : 'alertas activas'} · ${stations.length} estaciones bajo vigilancia`
-            : 'Vigilancia de lluvias en las estaciones del país'}</p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-[#111827]">Centro de Alertas</h1>
+            <p className="text-sm text-[#111827] mt-1">{isLive
+                ? `${activeAlerts.length} ${activeAlerts.length === 1 ? 'alerta activa' : 'alertas activas'} · ${stations.length} estaciones bajo vigilancia`
+                : 'Vigilancia de lluvias en las estaciones del país'}</p>
+          </div>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#90CAF9] text-[#1565C0] font-semibold hover:bg-[#E3F2FD] cursor-pointer disabled:opacity-60"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            Actualizar
+          </button>
+        </div>
       </section>
 
       <div className="py-6 sm:py-10 max-w-[1320px] mx-auto px-3 sm:px-6 lg:px-8 space-y-10 sm:space-y-12">
@@ -201,35 +213,9 @@ export const AlertasPage: React.FC<AlertasPageProps> = ({
             1. ALERTAS ACTIVAS (se generan solas a partir de la lluvia real)
             ===================================================================== */}
         <div>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-4">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-[#111827]">
-                Alertas activas por departamento{isLive && ` (${activeAlerts.length})`}
-              </h2>
-            </div>
-
-            <div className="flex items-center gap-3 text-xs text-[#111827]">
-              <span className="inline-flex items-center gap-1.5">
-                <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-[#1565C0] animate-pulse' : 'bg-[#9CA3AF]'}`} />
-                {isLive && `Actualizado hace ${wettest.updatedMinutesAgo} min`}
-                {dataStatus === 'cargando' && 'Consultando datos reales…'}
-                {dataStatus === 'sin-conexion' && 'Sin conexión con la fuente de datos'}
-              </span>
-              <button
-                type="button"
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#90CAF9] text-[#1565C0] font-semibold hover:bg-[#E3F2FD] cursor-pointer disabled:opacity-60"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-                Actualizar
-              </button>
-            </div>
-          </div>
-
           {/* Franja de estado: cuántos departamentos hay en cada nivel, en una sola línea */}
           {isLive && (
-            <div className="mb-5 flex flex-wrap items-center rounded-xl border border-[#BBDEFB] bg-white">
+            <div className="mb-5 flex flex-wrap items-center rounded-xl border border-[#BBDEFB] bg-[#BBDEFB]/50">
               <span className="hidden md:inline px-5 py-3 text-sm font-bold text-[#111827] border-r border-[#E3F2FD] whitespace-nowrap">
                 Departamentos
               </span>
@@ -277,11 +263,10 @@ export const AlertasPage: React.FC<AlertasPageProps> = ({
                 return (
                   <article
                     key={alert.id}
-                    className={`bg-white rounded-xl border border-[#BBDEFB] border-l-6 sm:border-l-8 ${style.border} p-4 sm:p-5 shadow-xs`}
+                    className="bg-[#E3F2FD]/60 rounded-xl border border-[#BBDEFB] p-4 sm:p-5 shadow-xs"
                   >
                     <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                       <div className="flex items-start gap-3 sm:gap-4">
-                        <AlertIcon className="w-10 h-10 sm:w-12 sm:h-12 shrink-0" color="#1565C0" />
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs">
                             <span className={`px-2 py-0.5 rounded-full border font-bold ${style.chip}`}><span className="inline-block w-2 h-2 rounded-full mr-1.5 align-middle" style={{ backgroundColor: style.color }} />
@@ -322,7 +307,7 @@ export const AlertasPage: React.FC<AlertasPageProps> = ({
                           <button
                             type="button"
                             onClick={() => onViewStationOnMap(station)}
-                            className="flex-1 px-4 py-2 sm:py-2.5 rounded-lg border border-[#42A5F5] hover:bg-[#E3F2FD] text-[#1565C0] text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap inline-flex items-center justify-center gap-1.5"
+                            className="flex-1 px-4 py-2 sm:py-2.5 rounded-lg border border-[#42A5F5] bg-white hover:bg-[#E3F2FD] text-[#1565C0] text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap inline-flex items-center justify-center gap-1.5"
                           >
                             <MapPin className="w-3.5 h-3.5" />
                             <span>Ver en el mapa</span>
@@ -346,7 +331,7 @@ export const AlertasPage: React.FC<AlertasPageProps> = ({
                   return (
                     <li
                       key={station.id}
-                      className={`rounded-xl border border-[#BBDEFB] border-l-6 ${style.border} bg-white p-3.5 flex items-center gap-3`}
+                      className="rounded-xl border border-[#BBDEFB] bg-white p-3.5 flex items-center gap-3"
                     >
                       <CloudRain className="w-7 h-7 shrink-0" style={{ color: '#1565C0' }} />
                       <p className="flex-1 text-sm text-[#111827] leading-snug">
