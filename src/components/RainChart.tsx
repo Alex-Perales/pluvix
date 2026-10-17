@@ -200,22 +200,21 @@ export const RainChart: React.FC<RainChartProps> = ({
         <div className="px-5 sm:px-6 py-4 border-t border-[#E3F2FD] bg-[#F8FBFF]">
           <span className="block text-sm font-bold text-[#111827] mb-2">Más lluvia hoy</span>
           <div className="flex flex-wrap gap-2">
-            {ranking.slice(0, 5).map((s, i) => (
+            {ranking.slice(0, 5).map((s) => (
               <button
                 key={s.id}
                 type="button"
                 onClick={() => setChosenId(s.id)}
                 aria-pressed={s.id === station.id}
-                className={`px-3 py-1.5 rounded-full border text-sm cursor-pointer inline-flex items-center gap-1.5 transition-colors ${
+                className={`px-3 py-1.5 rounded-lg border text-sm cursor-pointer inline-flex items-center gap-2 transition-colors ${
                   s.id === station.id
                     ? 'bg-[#1565C0] border-[#1565C0] text-white'
                     : 'bg-white border-[#BBDEFB] text-[#111827] hover:bg-[#E3F2FD]'
                 }`}
               >
-                <span className="font-bold">{i + 1}.</span>
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: RISK_UI[s.riskLevel].color }} />
-                {s.department}
-                <span className={s.id === station.id ? 'text-white' : 'text-[#1565C0]'}>{s.precipitationMm.toFixed(1)} mm</span>
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: RISK_UI[s.riskLevel].color }} />
+                <span className="font-semibold">{s.department}</span>
+                <span className={s.id === station.id ? 'text-white/90' : 'text-[#1565C0]'}>{s.precipitationMm.toFixed(1)} mm</span>
               </button>
             ))}
           </div>

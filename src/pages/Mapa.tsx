@@ -84,7 +84,7 @@ export const MapaPage: React.FC<MapaPageProps> = ({
           </div>
 
           {/* Panel lateral: estación elegida, filtros y lista de estaciones */}
-          <aside className="lg:col-span-4 order-2 bg-white rounded-xl border border-[#BBDEFB] p-4 sm:p-5 shadow-xs space-y-5">
+          <aside className="lg:col-span-4 order-2 bg-white rounded-xl border border-[#BBDEFB] p-4 sm:p-5 shadow-xs space-y-5 lg:flex lg:flex-col lg:h-[620px]">
             {/* Estación seleccionada */}
             <div>
               <h3 className="text-xs sm:text-sm font-bold text-[#1565C0] mb-2">Estación seleccionada</h3>
@@ -182,7 +182,7 @@ export const MapaPage: React.FC<MapaPageProps> = ({
             </div>
 
             {/* Lista de estaciones: al elegir una, el mapa vuela hasta ella */}
-            <div className="pt-4 border-t border-[#E3F2FD]">
+            <div className="pt-4 border-t border-[#E3F2FD] lg:flex-1 lg:min-h-0 lg:flex lg:flex-col">
               <h3 className="text-xs sm:text-sm font-bold text-[#1565C0] mb-2">
                 Estaciones ({filteredStations.length})
               </h3>
@@ -204,7 +204,7 @@ export const MapaPage: React.FC<MapaPageProps> = ({
                   </button>
                 </div>
               ) : (
-                <div className="max-h-72 overflow-y-auto divide-y divide-[#E3F2FD] border border-[#E3F2FD] rounded-lg">
+                <div className="max-h-72 lg:max-h-none lg:flex-1 lg:min-h-0 overflow-y-auto divide-y divide-[#E3F2FD] border border-[#E3F2FD] rounded-lg">
                   {filteredStations.map((st) => {
                     const isCurrent = st.id === selectedStation.id;
                     return (
@@ -222,9 +222,7 @@ export const MapaPage: React.FC<MapaPageProps> = ({
                             className="w-2.5 h-2.5 rounded-full shrink-0"
                             style={{ backgroundColor: RISK_UI[st.riskLevel].color }}
                           />
-                          <span className="truncate text-[#111827]">
-                            {st.department} <span className="font-normal text-[#111827]">· {st.region}</span>
-                          </span>
+                          <span className="truncate text-[#111827]">{st.department}</span>
                         </div>
                         <span className="font-bold text-[#1565C0] shrink-0">{isLive ? `${st.precipitationMm.toFixed(1)} mm` : '—'}</span>
                       </button>
@@ -233,15 +231,6 @@ export const MapaPage: React.FC<MapaPageProps> = ({
                 </div>
               )}
             </div>
-
-            <p className="flex items-center gap-1.5 text-xs text-[#111827]">
-              <span
-                className={`w-2 h-2 rounded-full ${dataStatus === 'en-vivo' ? 'bg-[#1565C0] animate-pulse' : 'bg-[#9CA3AF]'}`}
-              />
-              {dataStatus === 'en-vivo' && 'Datos en vivo · Open-Meteo'}
-              {dataStatus === 'cargando' && 'Consultando datos reales…'}
-              {dataStatus === 'sin-conexion' && 'Sin conexión con la fuente de datos'}
-            </p>
           </aside>
         </div>
       </section>

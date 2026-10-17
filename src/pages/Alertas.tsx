@@ -211,7 +211,7 @@ export const AlertasPage: React.FC<AlertasPageProps> = ({
             <div className="flex items-center gap-3 text-xs text-[#111827]">
               <span className="inline-flex items-center gap-1.5">
                 <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-[#1565C0] animate-pulse' : 'bg-[#9CA3AF]'}`} />
-                {isLive && `Datos en vivo · actualizado hace ${wettest.updatedMinutesAgo} min`}
+                {isLive && `Actualizado hace ${wettest.updatedMinutesAgo} min`}
                 {dataStatus === 'cargando' && 'Consultando datos reales…'}
                 {dataStatus === 'sin-conexion' && 'Sin conexión con la fuente de datos'}
               </span>
@@ -580,7 +580,7 @@ const DetailModal: React.FC<DetailModalProps> = ({ activeAlert, onClose }) => {
                 <div className="p-3 rounded-lg border border-[#BBDEFB] bg-white">
                   <div className="text-xs text-[#1565C0]">Emitida</div>
                   <div className="font-semibold text-[#111827] mt-0.5 font-mono-tabular">
-                    {activeAlert.issuedAt} — {activeAlert.validUntil}
+                    {activeAlert.issuedAt}, {activeAlert.validUntil}
                   </div>
                 </div>
               </div>

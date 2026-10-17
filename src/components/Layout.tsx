@@ -161,15 +161,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* Identidad */}
           <div>
             <div className="flex items-start gap-2">
-              {/* Bandera Nacional sutil */}
-              <div
-                className="w-4 h-3 mt-1.5 rounded-xs flex overflow-hidden border border-white/20 shrink-0"
-                title="República del Perú"
-              >
-                <div className="w-1/3 h-full bg-[#D91023]" />
-                <div className="w-1/3 h-full bg-white" />
-                <div className="w-1/3 h-full bg-[#D91023]" />
-              </div>
               <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
                 Pluvix: tu alerta antes de la lluvia
               </h3>
@@ -251,7 +242,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         {/* Fila final limpia */}
         <div className="pt-4 text-xs sm:text-xs text-white text-center">
           <span>
-            &copy; 2026 Pluvix · La información mostrada es referencial y no reemplaza los
+            &copy; Pluvix · La información mostrada es referencial y no reemplaza los
             avisos oficiales del SENAMHI ni del INDECI.
           </span>
         </div>
