@@ -18,8 +18,8 @@ interface RainChartProps {
 const PAST_DAYS_SHOWN = 7;
 
 const RISK_UI: Record<RiskLevel, { label: string; color: string }> = {
-  ALTO: { label: 'Alerta roja', color: RISK_COLOR.ALTO },
-  MEDIO: { label: 'Alerta naranja', color: RISK_COLOR.MEDIO },
+  ALTO: { label: 'Peligro', color: RISK_COLOR.ALTO },
+  MEDIO: { label: 'Precaución', color: RISK_COLOR.MEDIO },
   BAJO: { label: 'Normal', color: RISK_COLOR.BAJO },
 };
 
@@ -185,10 +185,10 @@ export const RainChart: React.FC<RainChartProps> = ({
                 <span className="w-3 h-3 rounded-sm bg-[#90CAF9]" /> Pronóstico
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="w-5 border-t-2 border-dashed border-[#F59E0B]" /> Alerta naranja ({UMBRAL_NARANJA_MM} mm)
+                <span className="w-5 border-t-2 border-dashed border-[#F59E0B]" /> Precaución ({UMBRAL_NARANJA_MM} mm)
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="w-5 border-t-2 border-dashed border-[#EF4444]" /> Alerta roja ({UMBRAL_ROJO_MM} mm)
+                <span className="w-5 border-t-2 border-dashed border-[#EF4444]" /> Peligro ({UMBRAL_ROJO_MM} mm)
               </span>
             </div>
           </>

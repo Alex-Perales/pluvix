@@ -199,7 +199,15 @@ export const NoticiasPage: React.FC = () => {
                   openNews?.id === news.id ? 'border-[#1E88E5] ring-2 ring-[#BBDEFB]' : 'border-[#BBDEFB]'
                 }`}
               >
-                <div>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setOpenNews(news)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') setOpenNews(news);
+                  }}
+                  className="cursor-pointer"
+                >
                   {/* Imagen rectangular pequeña en la parte superior de la tarjeta */}
                   <div className="relative h-40 sm:h-44 overflow-hidden bg-[#E3F2FD] border-b border-[#E3F2FD]">
                     <img

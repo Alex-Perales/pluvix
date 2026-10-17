@@ -14,14 +14,14 @@ interface AlertasPageProps {
 
 
 const STATUS_COUNTERS: { level: RiskLevel; label: string; short: string }[] = [
-  { level: 'ALTO', label: 'Alerta roja', short: 'Roja' },
-  { level: 'MEDIO', label: 'Alerta naranja', short: 'Naranja' },
+  { level: 'ALTO', label: 'Peligro', short: 'Peligro' },
+  { level: 'MEDIO', label: 'Precaución', short: 'Precaución' },
   { level: 'BAJO', label: 'Normal', short: 'Normal' },
 ];
 
 const LEVEL_STYLES: Record<RiskLevel, { color: string; label: string; chip: string; border: string }> = {
-  ALTO: { color: RISK_COLOR.ALTO, label: 'Roja', chip: 'bg-white text-[#111827] border-[#BBDEFB]', border: 'border-l-[#1565C0]' },
-  MEDIO: { color: RISK_COLOR.MEDIO, label: 'Naranja', chip: 'bg-white text-[#111827] border-[#BBDEFB]', border: 'border-l-[#1565C0]' },
+  ALTO: { color: RISK_COLOR.ALTO, label: 'Peligro', chip: 'bg-white text-[#111827] border-[#BBDEFB]', border: 'border-l-[#1565C0]' },
+  MEDIO: { color: RISK_COLOR.MEDIO, label: 'Precaución', chip: 'bg-white text-[#111827] border-[#BBDEFB]', border: 'border-l-[#1565C0]' },
   BAJO: { color: RISK_COLOR.BAJO, label: 'Normal', chip: 'bg-white text-[#111827] border-[#BBDEFB]', border: 'border-l-[#1565C0]' },
 };
 
@@ -80,8 +80,8 @@ export const AlertasPage: React.FC<AlertasPageProps> = ({
           id: `alerta-${s.id}`,
           code: s.name,
           title: red
-            ? `Alerta roja por lluvias intensas en ${s.department}`
-            : `Alerta naranja por lluvias moderadas en ${s.department}`,
+            ? `Peligro: lluvias intensas en ${s.department}`
+            : `Precaución: lluvias moderadas en ${s.department}`,
           department: s.department,
           provinces: [s.province],
           region: s.region,
@@ -285,7 +285,7 @@ export const AlertasPage: React.FC<AlertasPageProps> = ({
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs">
                             <span className={`px-2 py-0.5 rounded-full border font-bold ${style.chip}`}><span className="inline-block w-2 h-2 rounded-full mr-1.5 align-middle" style={{ backgroundColor: style.color }} />
-                              Alerta {style.label}
+                              {style.label}
                             </span>
                             <span className="text-[#111827]">
                               {alert.department} · {alert.region}
@@ -427,8 +427,8 @@ export const AlertasPage: React.FC<AlertasPageProps> = ({
                 className="py-1.5 px-2 text-xs rounded-lg border border-[#90CAF9] bg-white text-[#111827] font-medium focus:outline-none focus:border-[#1E88E5] cursor-pointer"
               >
                 <option value="Todos">Niveles: Todos</option>
-                <option value="ALTO">Roja (más de {UMBRAL_ROJO_MM} mm)</option>
-                <option value="MEDIO">Naranja ({UMBRAL_NARANJA_MM}–{UMBRAL_ROJO_MM} mm)</option>
+                <option value="ALTO">Peligro (más de {UMBRAL_ROJO_MM} mm)</option>
+                <option value="MEDIO">Precaución ({UMBRAL_NARANJA_MM}–{UMBRAL_ROJO_MM} mm)</option>
               </select>
 
               <button
@@ -547,7 +547,7 @@ const DetailModal: React.FC<DetailModalProps> = ({ activeAlert, onClose }) => {
                   <span>·</span>
                   <span>Región {activeAlert.region}</span>
                   <span>·</span>
-                  <span className="font-bold text-[#111827]">Riesgo: {activeAlert.riskLevel}</span>
+                  <span className="font-bold text-[#111827]">Riesgo: {LEVEL_STYLES[activeAlert.riskLevel].label}</span>
                 </div>
                 <h3 className="text-base sm:text-xl font-bold text-[#111827] mt-1 leading-snug">
                   {activeAlert.title}

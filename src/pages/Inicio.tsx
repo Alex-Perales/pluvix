@@ -19,27 +19,27 @@ const RISK_LEVELS = ['BAJO', 'MEDIO', 'ALTO'] as const;
 // color: relleno de íconos y barras · badge: fondo con texto blanco encima
 const RISK_STYLES = {
   ALTO: {
-    label: 'Alto',
+    label: 'Peligro',
     color: RISK_COLOR.ALTO,
     badge: '#1565C0',
     bg: 'bg-white',
     border: 'border-[#1565C0]',
     text: 'text-[#111827]',
     value: 'text-[#111827]',
-    desc: 'Alerta roja: umbral de lluvia superado.',
+    desc: 'Peligro: umbral de lluvia superado.',
   },
   MEDIO: {
-    label: 'Medio',
+    label: 'Precaución',
     color: RISK_COLOR.MEDIO,
     badge: '#1565C0',
     bg: 'bg-white',
     border: 'border-[#1565C0]',
     text: 'text-[#111827]',
     value: 'text-[#111827]',
-    desc: 'Alerta naranja: quebradas bajo vigilancia.',
+    desc: 'Precaución: quebradas bajo vigilancia.',
   },
   BAJO: {
-    label: 'Bajo',
+    label: 'Normal',
     color: RISK_COLOR.BAJO,
     badge: '#1565C0',
     bg: 'bg-white',
@@ -259,7 +259,7 @@ export const InicioPage: React.FC<InicioPageProps> = ({
                 <AlertIcon className="w-7 h-7" color="#1565C0" />
               </div>
               <p className={`mt-2 text-4xl sm:text-5xl font-extrabold tracking-tight ${risk.value}`}>
-                {selectedStation.riskLevel}
+                {risk.label}
               </p>
               <p className={`mt-1 text-sm font-medium ${risk.text}`}>{risk.desc}</p>
             </div>
@@ -398,7 +398,7 @@ export const InicioPage: React.FC<InicioPageProps> = ({
           {isLive && (
             <p className="mt-5 text-center text-xs sm:text-sm text-[#111827]">
               {selectedStation.department} se encuentra en la fase {currentPhase + 1} según su nivel de
-              riesgo {selectedStation.riskLevel.toLowerCase()}.
+              riesgo: {risk.label.toLowerCase()}.
             </p>
           )}
         </div>

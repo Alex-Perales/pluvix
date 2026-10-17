@@ -415,26 +415,26 @@ const FullscreenIcon: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 const LEGEND_ITEMS = [
-  { color: RISK_COLOR.ALTO, label: 'Alto', range: `> ${UMBRAL_ROJO_MM} mm` },
-  { color: RISK_COLOR.MEDIO, label: 'Medio', range: `${UMBRAL_NARANJA_MM}–${UMBRAL_ROJO_MM} mm` },
-  { color: RISK_COLOR.BAJO, label: 'Bajo', range: `< ${UMBRAL_NARANJA_MM} mm` },
+  { color: RISK_COLOR.ALTO, label: 'Peligro', range: `> ${UMBRAL_ROJO_MM} mm` },
+  { color: RISK_COLOR.MEDIO, label: 'Precaución', range: `${UMBRAL_NARANJA_MM}–${UMBRAL_ROJO_MM} mm` },
+  { color: RISK_COLOR.BAJO, label: 'Normal', range: `< ${UMBRAL_NARANJA_MM} mm` },
 ];
 
 const RISK_COLORS: Record<RiskLevel, { core: string; glow: string; label: string }> = {
   ALTO: {
     core: RISK_COLOR.ALTO,
     glow: 'rgba(239, 68, 68, 0.35)',
-    label: 'Riesgo Alto',
+    label: 'Peligro',
   },
   MEDIO: {
     core: RISK_COLOR.MEDIO,
     glow: 'rgba(245, 158, 11, 0.32)',
-    label: 'Riesgo Medio',
+    label: 'Precaución',
   },
   BAJO: {
     core: RISK_COLOR.BAJO,
     glow: 'rgba(34, 197, 94, 0.28)',
-    label: 'Riesgo Bajo',
+    label: 'Normal',
   },
 };
 
@@ -627,7 +627,7 @@ export const PeruMap: React.FC<PeruMapProps> = ({
             <strong style="color: #111827;">${station.precipitationMm.toFixed(1)} mm</strong>
           </div>
           <div style="margin-top: 4px; font-size: 13px; font-weight: 700; color: #111827;">
-            Riesgo: ${station.riskLevel}
+            Riesgo: ${palette.label}
           </div>
         </div>
       `);

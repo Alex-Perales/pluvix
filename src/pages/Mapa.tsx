@@ -12,9 +12,9 @@ interface MapaPageProps {
 }
 
 const RISK_UI: Record<RiskLevel, { label: string; color: string; chip: string }> = {
-  ALTO: { label: 'Alto', color: RISK_COLOR.ALTO, chip: 'bg-white text-[#111827] border-[#BBDEFB]' },
-  MEDIO: { label: 'Medio', color: RISK_COLOR.MEDIO, chip: 'bg-white text-[#111827] border-[#BBDEFB]' },
-  BAJO: { label: 'Bajo', color: RISK_COLOR.BAJO, chip: 'bg-white text-[#111827] border-[#BBDEFB]' },
+  ALTO: { label: 'Peligro', color: RISK_COLOR.ALTO, chip: 'bg-white text-[#111827] border-[#BBDEFB]' },
+  MEDIO: { label: 'Precaución', color: RISK_COLOR.MEDIO, chip: 'bg-white text-[#111827] border-[#BBDEFB]' },
+  BAJO: { label: 'Normal', color: RISK_COLOR.BAJO, chip: 'bg-white text-[#111827] border-[#BBDEFB]' },
 };
 
 export const MapaPage: React.FC<MapaPageProps> = ({
