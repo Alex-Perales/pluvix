@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, CloudRain, Gauge, Megaphone, MapPin, Clock, ChevronRight, Backpack, LifeBuoy, HeartPulse, PhoneCall } from 'lucide-react';
+import { CloudRain, Gauge, Megaphone, MapPin, Backpack, LifeBuoy, HeartPulse, PhoneCall } from 'lucide-react';
 import { WeatherStation, EMERGENCY_SITES, openOfficialSiteOnDesktop, RISK_COLOR } from '../data/stations';
 import { NavPage } from '../components/Layout';
 import { AlertIcon, ErrorNote, LoadingNote } from '../components/ui';
@@ -21,31 +21,22 @@ const RISK_STYLES = {
   ALTO: {
     label: 'Peligro',
     color: RISK_COLOR.ALTO,
-    badge: '#1565C0',
-    bg: 'bg-white',
     border: 'border-[#1565C0]',
     text: 'text-[#111827]',
-    value: 'text-[#111827]',
     desc: 'Peligro: umbral de lluvia superado.',
   },
   MEDIO: {
     label: 'Precaución',
     color: RISK_COLOR.MEDIO,
-    badge: '#1565C0',
-    bg: 'bg-white',
     border: 'border-[#1565C0]',
     text: 'text-[#111827]',
-    value: 'text-[#111827]',
     desc: 'Precaución: quebradas bajo vigilancia.',
   },
   BAJO: {
     label: 'Normal',
     color: RISK_COLOR.BAJO,
-    badge: '#1565C0',
-    bg: 'bg-white',
     border: 'border-[#1565C0]',
     text: 'text-[#111827]',
-    value: 'text-[#111827]',
     desc: 'Sin alerta: lluvias dentro de lo normal.',
   },
 };
@@ -54,17 +45,17 @@ const RISK_STYLES = {
 const SAT_PHASES = [
   {
     title: 'Monitoreo de lluvias',
-    text: 'Las estaciones registran la lluvia acumulada en las cuencas de Costa, Sierra y Selva.',
+    text: 'Las estaciones registran en tiempo real la lluvia acumulada en las cuencas de Costa, Sierra y Selva, usando datos de Open-Meteo que se actualizan cada 15 minutos.',
     Icon: CloudRain,
   },
   {
     title: 'Evaluación de umbrales',
-    text: 'Se compara la lluvia acumulada con los umbrales. Si se superan, se emite el aviso.',
+    text: 'Se compara la lluvia acumulada de las últimas 24 horas con los umbrales de precaución y peligro definidos por SENAMHI. Si se superan, el sistema emite el aviso automáticamente.',
     Icon: Gauge,
   },
   {
     title: 'Alerta y evacuación',
-    text: 'Se avisa a la población, se cierran badenes y se evacúa a las familias en zonas de riesgo.',
+    text: 'Se avisa a la población, se cierran badenes y se evacúa a las familias en zonas de riesgo, siguiendo los protocolos de Defensa Civil e INDECI para cada nivel de alerta.',
     Icon: Megaphone,
   },
 ];
@@ -119,7 +110,6 @@ export const InicioPage: React.FC<InicioPageProps> = ({
 }) => {
   const risk = RISK_STYLES[selectedStation.riskLevel];
   const isLive = dataStatus === 'en-vivo';
-  const currentPhase = RISK_LEVELS.indexOf(selectedStation.riskLevel);
 
   const rainGap = selectedStation.precipitationMm - selectedStation.thresholdRedMm;
   const overThreshold = rainGap >= 0;
@@ -163,7 +153,6 @@ export const InicioPage: React.FC<InicioPageProps> = ({
               onClick={() => onNavigate('mapa')}
               className="w-full max-w-xs sm:w-auto sm:max-w-none px-7 py-4 rounded-2xl bg-[#1E88E5] hover:bg-[#1976D2] text-white text-base sm:text-lg font-semibold transition-colors shadow-lg cursor-pointer flex items-center justify-center gap-2.5"
             >
-              <Layers className="w-5 h-5" />
               <span>Explorar Mapa Interactivo</span>
             </button>
             <button
@@ -171,7 +160,6 @@ export const InicioPage: React.FC<InicioPageProps> = ({
               onClick={() => onNavigate('alertas')}
               className="w-full max-w-xs sm:w-auto sm:max-w-none px-7 py-4 rounded-2xl bg-white hover:bg-[#E3F2FD] text-[#111827] text-base sm:text-lg font-semibold transition-colors shadow-lg cursor-pointer flex items-center justify-center gap-2.5"
             >
-              <AlertIcon className="w-6 h-6" color="currentColor" />
               <span>Ver Alertas Vigentes</span>
             </button>
           </div>
@@ -192,12 +180,6 @@ export const InicioPage: React.FC<InicioPageProps> = ({
                 <MapPin className="w-3.5 h-3.5 text-[#1565C0]" />
                 {selectedStation.name} · {selectedStation.basin}
               </span>
-              {isLive && (
-                <span className="inline-flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-[#1565C0]" />
-                  Actualizado hace {selectedStation.updatedMinutesAgo} min
-                </span>
-              )}
             </p>
           </div>
 
@@ -251,82 +233,75 @@ export const InicioPage: React.FC<InicioPageProps> = ({
         <div className="mt-6 sm:mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
           {/* Card 1: Nivel de riesgo con semáforo */}
           <article
-            className={`${risk.bg} rounded-2xl p-5 sm:p-6 border-2 ${risk.border} shadow-xs flex flex-col justify-between`}
+            className={`rounded-2xl border-2 ${risk.border} shadow-xs overflow-hidden flex flex-col transition-all hover:bg-[#BBDEFB]/40 hover:scale-[1.03]`}
           >
-            <div>
-              <div className="flex items-center justify-between">
-                <h3 className={`text-sm font-semibold ${risk.text}`}>Nivel de riesgo</h3>
-                <AlertIcon className="w-7 h-7" color="#1565C0" />
-              </div>
-              <p className={`mt-2 text-4xl sm:text-5xl font-extrabold tracking-tight ${risk.value}`}>
-                {risk.label}
-              </p>
-              <p className={`mt-1 text-sm font-medium ${risk.text}`}>{risk.desc}</p>
+            <div className="flex items-center gap-3 px-5 sm:px-6 py-4 text-white" style={{ backgroundColor: '#1565C0' }}>
+              <AlertIcon className="w-7 h-7 shrink-0" color="#FFFFFF" />
+              <h3 className="text-xl sm:text-2xl font-bold leading-tight">
+                Nivel de riesgo: {risk.label}
+              </h3>
             </div>
+            <div className="p-5 sm:p-6 flex flex-col justify-between flex-1">
+              <p className={`text-sm font-medium ${risk.text}`}>{risk.desc}</p>
 
-            {/* Semáforo: resalta el nivel vigente */}
-            <div className="mt-5 grid grid-cols-3 gap-1.5" aria-hidden="true">
-              {RISK_LEVELS.map((level) => (
-                <div key={level}>
-                  <div
-                    className="h-2 rounded-full"
-                    style={{
-                      backgroundColor:
-                        level === selectedStation.riskLevel ? RISK_STYLES[level].color : 'rgba(17,24,39,0.12)',
-                    }}
-                  />
-                  <span
-                    className={`block mt-1 text-xs text-center ${
-                      level === selectedStation.riskLevel ? `font-bold ${risk.text}` : 'text-[#111827]'
-                    }`}
-                  >
-                    {RISK_STYLES[level].label}
-                  </span>
-                </div>
-              ))}
+              {/* Semáforo: resalta el nivel vigente */}
+              <div className="mt-5 grid grid-cols-3 gap-1.5" aria-hidden="true">
+                {RISK_LEVELS.map((level) => (
+                  <div key={level}>
+                    <div
+                      className="h-2 rounded-full"
+                      style={{
+                        backgroundColor:
+                          level === selectedStation.riskLevel ? RISK_STYLES[level].color : 'rgba(17,24,39,0.12)',
+                      }}
+                    />
+                    <span
+                      className={`block mt-1 text-xs text-center ${
+                        level === selectedStation.riskLevel ? `font-bold ${risk.text}` : 'text-[#111827]'
+                      }`}
+                    >
+                      {RISK_STYLES[level].label}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </article>
 
           {/* Card 2: Lluvia acumulada frente al umbral */}
-          <article className="bg-white rounded-2xl p-5 sm:p-6 border border-[#BBDEFB] shadow-xs flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-[#111827]">Lluvia acumulada (24 h)</h3>
-                <CloudRain className="w-6 h-6 text-[#1565C0]" />
-              </div>
-              <p className="mt-2 text-4xl sm:text-5xl font-extrabold tracking-tight text-[#111827]">
-                {selectedStation.precipitationMm.toFixed(1)}
-                <span className="ml-1.5 text-lg font-semibold text-[#111827]">mm</span>
-              </p>
-              <p
-                className={`mt-1 text-sm font-medium ${
-                  overThreshold ? 'text-[#111827]' : 'text-[#111827]'
-                }`}
-              >
+          <article className="rounded-2xl border-2 border-[#BBDEFB] shadow-xs overflow-hidden flex flex-col transition-all hover:bg-[#BBDEFB]/40 hover:scale-[1.03]">
+            <div className="flex items-center gap-3 px-5 sm:px-6 py-4 text-white" style={{ backgroundColor: '#1565C0' }}>
+              <AlertIcon className="w-7 h-7 shrink-0" color="#FFFFFF" />
+              <h3 className="text-xl sm:text-2xl font-bold leading-tight">
+                Lluvia acumulada (24 h): {selectedStation.precipitationMm.toFixed(1)} mm
+              </h3>
+            </div>
+            <div className="p-5 sm:p-6 flex flex-col justify-between flex-1">
+              <p className="text-sm font-medium text-[#111827]">
                 {overThreshold
                   ? `+${rainGap.toFixed(1)} mm sobre el umbral`
                   : `Faltan ${Math.abs(rainGap).toFixed(1)} mm para el umbral`}
               </p>
-            </div>
 
-            {/* Barra de lluvia con la marca del umbral de alerta roja */}
-            <div className="mt-5">
-              <div className="relative h-2 rounded-full bg-[#E3F2FD]">
-                <div
-                  className="absolute inset-y-0 left-0 rounded-full"
-                  style={{
-                    width: `${(selectedStation.precipitationMm / rainScale) * 100}%`,
-                    backgroundColor: '#1565C0',
-                  }}
-                />
-                <div
-                  className="absolute -top-1 -bottom-1 w-0.5 bg-[#111827]"
-                  style={{ left: `${(selectedStation.thresholdRedMm / rainScale) * 100}%` }}
-                />
+              {/* Barra de lluvia con la marca del umbral de alerta roja */}
+              <div className="mt-5">
+                <div className="relative h-2 rounded-full bg-[#E3F2FD]">
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-full"
+                    style={{
+                      width: `${(selectedStation.precipitationMm / rainScale) * 100}%`,
+                      backgroundColor: '#1565C0',
+                    }}
+                  />
+                  <div
+                    className="absolute -top-1 -bottom-1 w-0.5 bg-[#111827]"
+                    style={{ left: `${(selectedStation.thresholdRedMm / rainScale) * 100}%` }}
+                  />
+                </div>
+                <span className="block mt-1 text-xs text-[#111827]">
+                  Umbral de alerta roja: {selectedStation.thresholdRedMm.toFixed(1)} mm
+                </span>
               </div>
-              <span className="block mt-1 text-xs text-[#111827]">
-                Umbral de alerta roja: {selectedStation.thresholdRedMm.toFixed(1)} mm
-              </span>
             </div>
           </article>
         </div>
@@ -348,59 +323,27 @@ export const InicioPage: React.FC<InicioPageProps> = ({
           </div>
 
           <ol className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-            {SAT_PHASES.map(({ title, text, Icon }, index) => {
-              const isCurrent = isLive && index === currentPhase;
-              return (
-                <li
-                  key={title}
-                  className={`relative bg-white rounded-2xl p-5 sm:p-6 border-2 ${
-                    isCurrent ? risk.border : 'border-[#BBDEFB]'
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-12 h-12 rounded-full flex items-center justify-center text-white shrink-0"
-                        style={{ backgroundColor: isCurrent ? '#1565C0' : '#90CAF9' }}
-                      >
-                        <Icon className="w-6 h-6" />
-                      </div>
-                      <span className="text-xs font-bold text-[#111827] uppercase tracking-wider">
-                        Fase {index + 1}
-                      </span>
-                    </div>
-                    {isCurrent && (
-                      <span
-                        className="px-2.5 py-1 rounded-full text-xs font-bold text-white whitespace-nowrap"
-                        style={{ backgroundColor: risk.badge }}
-                      >
-                        Fase actual
-                      </span>
-                    )}
+            {SAT_PHASES.map(({ title, text, Icon }, index) => (
+              <li
+                key={title}
+                className="bg-white rounded-2xl p-5 sm:p-6 border-2 border-[#BBDEFB] transition-all hover:bg-[#BBDEFB]/40 hover:scale-[1.03]"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: '#1565C0', color: '#FFFFFF' }}
+                  >
+                    <Icon className="w-6 h-6" />
                   </div>
-                  <h3 className="text-base sm:text-lg font-bold text-[#111827] mt-4">{title}</h3>
-                  <p className="text-sm text-[#111827] mt-1.5 leading-relaxed">{text}</p>
-
-                  {/* Flecha hacia la fase siguiente */}
-                  {index < SAT_PHASES.length - 1 && (
-                    <div
-                      className="hidden md:flex absolute top-1/2 -right-2 sm:-right-3 -translate-y-1/2 translate-x-1/2 z-10 w-7 h-7 rounded-full bg-white border border-[#BBDEFB] items-center justify-center text-[#1565C0]"
-                      aria-hidden="true"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </div>
-                  )}
-                </li>
-              );
-            })}
+                  <span className="text-sm font-bold text-[#111827] uppercase tracking-wider">
+                    Fase {index + 1}: {title}
+                  </span>
+                </div>
+                <hr className="mt-4 mx-3 border-t border-[#90CAF9]" />
+                <p className="text-sm text-[#111827] mt-4 leading-relaxed">{text}</p>
+              </li>
+            ))}
           </ol>
-
-          {isLive && (
-            <p className="mt-5 text-center text-xs sm:text-sm text-[#111827]">
-              {selectedStation.department} se encuentra en la fase {currentPhase + 1} según su nivel de
-              riesgo: {risk.label.toLowerCase()}.
-            </p>
-          )}
         </div>
       </section>
 
@@ -420,7 +363,7 @@ export const InicioPage: React.FC<InicioPageProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {EMERGENCY_STEPS.map(({ moment, title, Icon, color, steps }) => (
-              <article key={moment} className="bg-white rounded-2xl border border-[#BBDEFB] overflow-hidden">
+              <article key={moment} className="bg-white rounded-2xl border border-[#BBDEFB] overflow-hidden transition-all hover:bg-[#BBDEFB]/40 hover:scale-[1.03]">
                 <div className="flex items-center gap-3 px-5 sm:px-6 py-4 text-white" style={{ backgroundColor: color }}>
                   <Icon className="w-8 h-8 shrink-0" />
                   <div>
@@ -434,8 +377,8 @@ export const InicioPage: React.FC<InicioPageProps> = ({
                   {steps.map((step, index) => (
                     <li key={step} className="flex items-start gap-3 text-sm text-[#111827] leading-relaxed">
                       <span
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"
-                        style={{ color: '#1565C0', backgroundColor: '#E8F1FB' }}
+                        className="w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"
+                        style={{ color: '#1565C0' }}
                       >
                         {index + 1}
                       </span>
