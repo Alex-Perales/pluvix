@@ -237,7 +237,7 @@ export const InicioPage: React.FC<InicioPageProps> = ({
           >
             <div className="flex items-center gap-3 px-5 sm:px-6 py-4 text-white" style={{ backgroundColor: '#1565C0' }}>
               <AlertIcon className="w-7 h-7 shrink-0" color="#FFFFFF" />
-              <h3 className="text-xl sm:text-2xl font-bold leading-tight">
+              <h3 className="text-base sm:text-lg font-bold leading-tight">
                 Nivel de riesgo: {risk.label}
               </h3>
             </div>
@@ -272,7 +272,7 @@ export const InicioPage: React.FC<InicioPageProps> = ({
           <article className="rounded-2xl border-2 border-[#BBDEFB] shadow-xs overflow-hidden flex flex-col transition-all hover:bg-[#BBDEFB]/40 hover:scale-[1.03]">
             <div className="flex items-center gap-3 px-5 sm:px-6 py-4 text-white" style={{ backgroundColor: '#1565C0' }}>
               <AlertIcon className="w-7 h-7 shrink-0" color="#FFFFFF" />
-              <h3 className="text-xl sm:text-2xl font-bold leading-tight">
+              <h3 className="text-base sm:text-lg font-bold leading-tight">
                 Lluvia acumulada (24 h): {selectedStation.precipitationMm.toFixed(1)} mm
               </h3>
             </div>
