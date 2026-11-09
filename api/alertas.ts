@@ -6,11 +6,10 @@
 //   1. consulta la lluvia real de las 24 h en Open-Meteo (igual que src/data/weather.ts);
 //   2. compara el nivel de riesgo de cada estación con el último que se notificó
 //      (guardado en un objeto JSON en S3, para no enviar el mismo aviso cada 15 min);
-//   3. si alguna estación entra o sube a Precaución/Peligro, le envía un correo por SES
-//      a cada suscriptor confirmado (ver api/db.ts y api/suscripciones.ts).
+//   3. si alguna estación entra o sube a Precaución/Peligro, le envía un correo (Gmail SMTP,
+//      ver api/mail.ts) a cada suscriptor confirmado (ver api/db.ts y api/suscripciones.ts).
 
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { SendEmailCommand, SESv2Client } from '@aws-sdk/client-sesv2';
 import {
   PERU_STATIONS,
   PROTOCOL_STEPS,
@@ -20,18 +19,17 @@ import {
   type RiskLevel,
 } from '../src/data/stations.ts';
 import { listarConfirmados, type Suscriptor } from './db.ts';
+import { enviarCorreo as enviarPorGmail } from './mail.ts';
 
 const REGION = process.env.AWS_REGION ?? 'us-east-1';
 const BUCKET = process.env.STATE_BUCKET!;
 const STATE_KEY = 'estado-alertas.json';
-const CORREO_DESDE = process.env.SES_FROM!;
 // URL pública de este API Gateway (la misma que usa suscripciones.ts), para el enlace de baja
 const API_URL = process.env.API_URL!;
 // URL pública de la página (Amplify); se puede sobrescribir con la variable de entorno PAGE_URL
 const SITE_URL = process.env.PAGE_URL ?? 'https://main.d1kvur8mu9ge35.amplifyapp.com/';
 
 const s3 = new S3Client({ region: REGION });
-const ses = new SESv2Client({ region: REGION });
 
 // Último nivel notificado por estación: evita reenviar el mismo aviso en cada corrida
 type Estado = Record<string, RiskLevel>;
@@ -120,18 +118,7 @@ async function enviarCorreo(escaladas: Escalada[], destinatarios: Suscriptor[]) 
   await Promise.all(
     destinatarios.map((suscriptor) => {
       const baja = `${API_URL}/baja?correo=${encodeURIComponent(suscriptor.email)}&token=${suscriptor.token}`;
-      return ses.send(
-        new SendEmailCommand({
-          FromEmailAddress: CORREO_DESDE,
-          Destination: { ToAddresses: [suscriptor.email] },
-          Content: {
-            Simple: {
-              Subject: { Data: asunto },
-              Body: { Text: { Data: `${cuerpo}\n\nDarte de baja de estas alertas: ${baja}` } },
-            },
-          },
-        })
-      );
+      return enviarPorGmail(suscriptor.email, asunto, `${cuerpo}\n\nDarte de baja de estas alertas: ${baja}`);
     })
   );
 }

@@ -23,6 +23,7 @@ api/
   alertas.ts         Revisa los umbrales y avisa por correo a cada suscriptor. Lambda programada (EventBridge).
   suscripciones.ts   Suscribir / confirmar / dar de baja un correo. Lambda detrás de API Gateway.
   db.ts              Acceso a la tabla de suscriptores (DynamoDB), compartido por alertas.ts y suscripciones.ts.
+  mail.ts            Envío de correo por Gmail SMTP, compartido por alertas.ts y suscripciones.ts.
 public/
   media/             Video de portada, imagen, logo e ícono de la pestaña.
 src/
@@ -66,42 +67,52 @@ Usuario → CloudFront/Amplify (dist/) → React en el navegador
                                           │
                                           ├─ Open-Meteo API (directo, sin AWS)
                                           └─ VITE_API_URL → API Gateway ─┬─ Lambda (noticias.ts) → gob.pe
-                                                                         └─ Lambda (suscripciones.ts) → SES + DynamoDB
+                                                                         └─ Lambda (suscripciones.ts) → Gmail SMTP + DynamoDB
 
 EventBridge (cada 15 min) → Lambda (alertas.ts) → Open-Meteo (lluvia) + S3 (último nivel por estación)
-                                                  + DynamoDB (suscriptores confirmados) → SES → un correo por suscriptor
+                                                  + DynamoDB (suscriptores confirmados) → Gmail SMTP → un correo por suscriptor
 ```
 
 No se necesita RDS ni Cognito: el sitio no guarda datos de usuarios, salvo la lista de correos suscritos
 (DynamoDB) y un JSON chico en S3 con el último nivel de riesgo notificado por estación, para no reenviar el
 mismo aviso cada 15 minutos.
 
-4. **Alertas por correo y suscripción pública** (Lambdas + S3 + DynamoDB + SES):
+> **Por qué Gmail y no Amazon SES:** en cuentas de laboratorio (AWS Academy / Vocareum, el típico rol
+> `assumed-role/voclabs/...`) el permiso `ses:*` normalmente está bloqueado y no se puede cambiar. Enviar por
+> SMTP a Gmail es tráfico de red común, no una llamada a la API de AWS, así que no depende de ningún permiso
+> de IAM y funciona igual en una cuenta de laboratorio o en una cuenta propia. Si más adelante usas una cuenta
+> de AWS sin esa restricción, se podría volver a SES para enviar a mayor volumen sin depender de una cuenta de
+> Gmail — pero para este proyecto, con pocos suscriptores, Gmail es más que suficiente.
+
+4. **Alertas por correo y suscripción pública** (Lambdas + S3 + DynamoDB + Gmail SMTP):
    - **Compilar**: `npm run build:alertas` y `npm run build:suscripciones` generan `dist-lambda/alertas/index.js`
-     y `dist-lambda/suscripciones/index.js` (cada uno con el AWS SDK y `src/data/stations.ts` empaquetados),
-     listos para subir a cada Lambda tal cual, por ejemplo con `zip`.
-   - **SES**: en *Amazon SES → Verified identities*, verificar el remitente (`pluvixap@gmail.com`). Mientras la
-     cuenta esté en modo sandbox, SES solo envía a destinatarios verificados uno por uno — así que, para probar,
-     verifica también tu propio correo y suscríbete con ese. Para que **cualquiera** pueda suscribirse de verdad
-     (el botón de la web), hay que pedir salir del sandbox: *SES → Account dashboard → Request production access*,
-     es un formulario corto y gratis, tarda ~24 h en aprobarse.
+     y `dist-lambda/suscripciones/index.js` (cada uno con el AWS SDK, `nodemailer` y `src/data/stations.ts`
+     empaquetados), listos para subir a cada Lambda tal cual, por ejemplo con `zip`.
+   - **Gmail**: en la cuenta `pluvixap@gmail.com`, activar la verificación en 2 pasos (*Cuenta de Google →
+     Seguridad*) y generar una "contraseña de aplicación" en https://myaccount.google.com/apppasswords. Esa
+     contraseña (no la normal de la cuenta) es `GMAIL_APP_PASSWORD` más abajo.
    - **DynamoDB**: crear una tabla (p. ej. `pluvix-suscriptores`) con clave de partición `email` (tipo *String*).
    - **S3**: crear (o reutilizar) un bucket para guardar `estado-alertas.json` (un objeto pequeño, sin costo real).
+   - **Rol de ejecución de las Lambdas**: en una cuenta de laboratorio normalmente no se puede crear un rol de
+     IAM nuevo — usar el rol ya existente (suele llamarse `LabRole`), que ya trae permisos para Lambda, S3,
+     DynamoDB y CloudWatch Logs. En una cuenta propia, crear un rol con `AWSLambdaBasicExecutionRole` +
+     `s3:GetObject`/`s3:PutObject` sobre el bucket + `dynamodb:Scan`/`GetItem`/`PutItem`/`UpdateItem`/`DeleteItem`
+     sobre la tabla (ya no hace falta ningún permiso de `ses:*`).
    - **Lambda `alertas.ts`** (programada, Node.js 20+): subir `dist-lambda/alertas/index.js` como `index.handler`.
-     Rol con `AWSLambdaBasicExecutionRole` + `s3:GetObject`/`s3:PutObject` sobre el bucket + `dynamodb:Scan` sobre
-     la tabla + `ses:SendEmail`. Variables de entorno:
+     Variables de entorno:
      ```
      STATE_BUCKET=<nombre del bucket>
      SUSCRIPTORES_TABLE=pluvix-suscriptores
-     SES_FROM=pluvixap@gmail.com
+     GMAIL_USER=pluvixap@gmail.com
+     GMAIL_APP_PASSWORD=<la contraseña de aplicación de 16 caracteres>
      API_URL=https://xxxxxx.execute-api.us-east-1.amazonaws.com   (el mismo API Gateway del punto 2)
      PAGE_URL=https://main.d1kvur8mu9ge35.amplifyapp.com/         (opcional; es el valor por defecto)
      ```
      **Programación**: en *Amazon EventBridge → Scheduler*, crear una regla con tasa fija (p. ej.
      `rate(15 minutes)`) que invoque esta Lambda.
    - **Lambda `suscripciones.ts`** (detrás de API Gateway, Node.js 20+): subir `dist-lambda/suscripciones/index.js`
-     como `index.handler`. Rol con `AWSLambdaBasicExecutionRole` + `dynamodb:GetItem`/`PutItem`/`UpdateItem`/`DeleteItem`
-     sobre la tabla + `ses:SendEmail`. Mismas variables `SUSCRIPTORES_TABLE`, `SES_FROM`, `API_URL` y `PAGE_URL`.
+     como `index.handler`. Mismas variables `SUSCRIPTORES_TABLE`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `API_URL`
+     y `PAGE_URL` (no necesita `STATE_BUCKET`).
    - Los umbrales, el texto de cada nivel y las recomendaciones de "qué hacer" son los mismos que usa la página
      (`UMBRAL_NARANJA_MM`, `UMBRAL_ROJO_MM` y `PROTOCOL_STEPS` en `src/data/stations.ts`): cambiarlos ahí y volver a
      compilar y subir la Lambda `alertas.ts` los actualiza en ambos lados.

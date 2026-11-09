@@ -9,37 +9,21 @@
 // Nadie empieza a recibir alertas sin hacer clic en el enlace de confirmación: así
 // evitamos que alguien suscriba el correo de otra persona sin su permiso.
 
-import { SendEmailCommand, SESv2Client } from '@aws-sdk/client-sesv2';
 import { confirmar, crearPendiente, darDeBaja, esCorreoValido, obtenerSuscriptor } from './db.ts';
+import { enviarCorreo } from './mail.ts';
 
-const REGION = process.env.AWS_REGION ?? 'us-east-1';
-const CORREO_DESDE = process.env.SES_FROM!;
 // URL pública de este API Gateway: para armar los enlaces de confirmación y de baja del correo
 const API_URL = process.env.API_URL!;
 const SITE_URL = process.env.PAGE_URL ?? 'https://main.d1kvur8mu9ge35.amplifyapp.com/';
 
-const ses = new SESv2Client({ region: REGION });
-
 async function enviarConfirmacion(correo: string, token: string) {
   const enlace = `${API_URL}/confirmar?correo=${encodeURIComponent(correo)}&token=${token}`;
-  await ses.send(
-    new SendEmailCommand({
-      FromEmailAddress: CORREO_DESDE,
-      Destination: { ToAddresses: [correo] },
-      Content: {
-        Simple: {
-          Subject: { Data: 'Confirma tu suscripción a las alertas de Pluvix' },
-          Body: {
-            Text: {
-              Data:
-                `Pediste recibir en este correo las alertas de lluvia de Pluvix.\n\n` +
-                `Para confirmar, abre este enlace:\n${enlace}\n\n` +
-                `Si no fuiste tú, ignora este correo: no se activará ninguna suscripción.`,
-            },
-          },
-        },
-      },
-    })
+  await enviarCorreo(
+    correo,
+    'Confirma tu suscripción a las alertas de Pluvix',
+    `Pediste recibir en este correo las alertas de lluvia de Pluvix.\n\n` +
+      `Para confirmar, abre este enlace:\n${enlace}\n\n` +
+      `Si no fuiste tú, ignora este correo: no se activará ninguna suscripción.`
   );
 }
 
