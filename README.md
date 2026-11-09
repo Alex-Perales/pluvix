@@ -20,7 +20,9 @@ Abre http://localhost:3000
 ```
 api/
   noticias.ts        Funciones de noticias (gob.pe). En local las usa Vite; en AWS es la Lambda.
-  alertas.ts         Revisa los umbrales y avisa por correo a cada suscriptor. Lambda programada (EventBridge).
+  alertas.ts         Revisa los umbrales y publica las alertas en Kafka. Lambda programada (EventBridge).
+  kafka.ts           Conexión a Kafka y publicación de alertas.
+  notificador.ts     Consumidor de Kafka: envía el correo a cada suscriptor. Proceso continuo (EC2 o PC).
   suscripciones.ts   Suscribir / confirmar / dar de baja un correo. Lambda detrás de API Gateway.
   db.ts              Acceso a la tabla de suscriptores (DynamoDB), compartido por alertas.ts y suscripciones.ts.
   mail.ts            Envío de correo por Gmail SMTP, compartido por alertas.ts y suscripciones.ts.
@@ -70,8 +72,16 @@ Usuario → CloudFront/Amplify (dist/) → React en el navegador
                                                                          └─ Lambda (suscripciones.ts) → Gmail SMTP + DynamoDB
 
 EventBridge (cada 15 min) → Lambda (alertas.ts) → Open-Meteo (lluvia) + S3 (último nivel por estación)
-                                                  + DynamoDB (suscriptores confirmados) → Gmail SMTP → un correo por suscriptor
+                                                  → Kafka (tópico pluvix.alertas)
+                                                  → notificador.ts + DynamoDB (suscriptores confirmados) → Gmail SMTP → un correo por suscriptor
 ```
+
+> **Kafka:** las alertas pasan por el tópico `pluvix.alertas`. La Lambda `alertas.ts` ahora solo necesita
+> `STATE_BUCKET`, `KAFKA_BROKERS`, `KAFKA_USERNAME` y `KAFKA_PASSWORD`, y un timeout de 30 s. El broker debe ser
+> accesible desde internet (p. ej. Confluent Cloud). `npm run build:notificador` genera el consumidor, que se
+> ejecuta con `node --env-file=.env.kafka dist-lambda/notificador/index.js` y necesita las variables de Kafka más
+> `SUSCRIPTORES_TABLE`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `API_URL`, `PAGE_URL` y `AWS_REGION`. Lo indicado más
+> abajo sobre el correo desde la Lambda `alertas.ts` lo hace ahora este consumidor.
 
 No se necesita RDS ni Cognito: el sitio no guarda datos de usuarios, salvo la lista de correos suscritos
 (DynamoDB) y un JSON chico en S3 con el último nivel de riesgo notificado por estación, para no reenviar el
