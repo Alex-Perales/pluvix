@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { Download, Search, ArrowUpRight, CloudRain, MapPin, RefreshCw, ShieldCheck, X, CheckCircle2 } from 'lucide-react';
 import { AlertIcon, Bone, ErrorNote, LoadingNote } from '../components/ui';
-import { ActiveAlert, HistoricalAlert, NaturalRegion, RiskLevel, WeatherStation, riskFor, UMBRAL_ROJO_MM, UMBRAL_NARANJA_MM, RISK_COLOR } from '../data/stations';
+import { ActiveAlert, HistoricalAlert, NaturalRegion, RiskLevel, WeatherStation, riskFor, UMBRAL_ROJO_MM, UMBRAL_NARANJA_MM, RISK_COLOR, PROTOCOL_STEPS } from '../data/stations';
 import { LiveStatus, useRainOutlook } from '../data/weather';
 import { RainChart } from '../components/RainChart';
+import { SubscribeButton } from '../components/SubscribeButton';
 
 interface AlertasPageProps {
   stations: WeatherStation[];
@@ -25,20 +26,6 @@ const LEVEL_STYLES: Record<RiskLevel, { color: string; label: string; chip: stri
   BAJO: { color: RISK_COLOR.BAJO, label: 'Normal', chip: 'bg-white text-[#111827] border-[#BBDEFB]' },
 };
 
-
-// Recomendaciones generales de Defensa Civil según el nivel de la alerta
-const PROTOCOL_STEPS: Record<'ALTO' | 'MEDIO', string[]> = {
-  ALTO: [
-    'Aléjese de ríos, quebradas y badenes; no intente cruzarlos a pie ni en vehículo.',
-    'Si vive en una zona baja o junto a un cauce, evacúe hacia la zona segura indicada por su municipalidad.',
-    'Tenga lista su mochila de emergencia y siga las indicaciones de Defensa Civil (línea 115).',
-  ],
-  MEDIO: [
-    'Manténgase atento a los avisos y evite permanecer cerca de quebradas y cauces secos.',
-    'Revise techos, canaletas y drenajes de su vivienda, y proteja sus documentos.',
-    'Ubique la zona segura y la ruta de evacuación de su localidad por si la lluvia aumenta.',
-  ],
-};
 
 const WEEKDAYS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
 const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'set', 'oct', 'nov', 'dic'];
@@ -196,15 +183,18 @@ export const AlertasPage: React.FC<AlertasPageProps> = ({
                 ? `${activeAlerts.length} ${activeAlerts.length === 1 ? 'alerta activa' : 'alertas activas'} · ${stations.length} estaciones bajo vigilancia`
                 : 'Vigilancia de lluvias en las estaciones del país'}</p>
           </div>
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#90CAF9] text-[#1565C0] font-semibold hover:bg-[#E3F2FD] cursor-pointer disabled:opacity-60"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-            Actualizar
-          </button>
+          <div className="shrink-0 flex items-center gap-2">
+            <SubscribeButton />
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#90CAF9] text-[#1565C0] font-semibold hover:bg-[#E3F2FD] cursor-pointer disabled:opacity-60"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+              Actualizar
+            </button>
+          </div>
         </div>
       </section>
 

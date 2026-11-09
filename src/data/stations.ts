@@ -73,6 +73,21 @@ export const RISK_COLOR: Record<RiskLevel, string> = {
   BAJO: '#22C55E',
 };
 
+// Recomendaciones generales de Defensa Civil según el nivel de la alerta.
+// Se usan en la página de Alertas y en el correo de aviso (api/alertas.ts).
+export const PROTOCOL_STEPS: Record<'ALTO' | 'MEDIO', string[]> = {
+  ALTO: [
+    'Aléjese de ríos, quebradas y badenes; no intente cruzarlos a pie ni en vehículo.',
+    'Si vive en una zona baja o junto a un cauce, evacúe hacia la zona segura indicada por su municipalidad.',
+    'Tenga lista su mochila de emergencia y siga las indicaciones de Defensa Civil (línea 115).',
+  ],
+  MEDIO: [
+    'Manténgase atento a los avisos y evite permanecer cerca de quebradas y cauces secos.',
+    'Revise techos, canaletas y drenajes de su vivienda, y proteja sus documentos.',
+    'Ubique la zona segura y la ruta de evacuación de su localidad por si la lluvia aumenta.',
+  ],
+};
+
 // Ubicación de cada punto de monitoreo. La lluvia y el riesgo se completan con datos
 // reales de Open-Meteo al cargar la página (ver data/weather.ts).
 export const PERU_STATIONS: WeatherStation[] = [
